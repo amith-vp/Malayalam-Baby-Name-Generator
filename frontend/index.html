@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malayalam Baby Name Generator</title>
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        #results-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .generated-names-container {
+            overflow: auto;
+            padding: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .generated-name-button {
+            margin: 5px;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+            background-color: #4f46e5;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <div class="flex flex-col items-center justify-center">
+            <div class="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+                <div class="text-center font-bold text-2xl mb-4">Malayalam Baby Name Generator</div>
+                <div class="mb-4">
+                    <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                    <select id="gender" name="gender"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="boy">Boy</option>
+                        <option value="girl">Girl</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="theme" class="block text-sm font-medium text-gray-700">Theme</label>
+                    <input type="text" id="theme" name="theme"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div class="mb-6">
+                    <button type="submit" id="generateButton"
+                        class="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transform bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-indigo-500 focus:ring-offset-2">Generate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-container" class="container mx-auto">
+        <div id="generated-names" class="generated-names-container flex justify-center"></div>
+    </div>
+    <div class="container mx-auto p-4 mt-8 text-center">
+        Created by <a href="https://amithv.xyz" class="text-blue-500 hover:underline">Amith</a>,
+        <a href="https://github.com/amith-vp/Malayalam-Baby-Name-Generator" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">Github        </a>
+    </div>
+    <script>
+        const generateButton = document.querySelector('#generateButton');
+        const resultsContainer = document.querySelector('#results-container');
+        const namesContainer = document.querySelector('#generated-names');
+        let lastButtonClickTime = 0;
+        const cooldownTime = 10000;
+        generateButton.addEventListener('click', async () => {
+            const currentTime = Date.now();
+
+            const gender = document.querySelector('#gender').value;
+            const theme = document.querySelector('#theme').value;
+
+
+            try {
+                const timeElapsedSinceLastClick = currentTime - lastButtonClickTime;
+                const remainingTime = cooldownTime - timeElapsedSinceLastClick;
+
+                if (remainingTime > 0) {
+                    const remainingSeconds = Math.ceil(remainingTime / 1000);
+                    alert(`Chef...Easy on cooking, Gemini API only allows 60 request/minute. Please wait ${remainingSeconds} seconds before generating names again.`);
+                    return;
+                }
+
+                generateButton.textContent = '🔥🔥Let Google Gemini AI COOK...🔥🔥';
+
+                const names = await generateNames(gender, theme);
+
+                // Clear previous results
+                namesContainer.innerHTML = '';
+
+                names.forEach(name => {
+                    const nameButton = document.createElement('button');
+                    nameButton.textContent = name;
+                    nameButton.classList.add('generated-name-button');
+                    namesContainer.appendChild(nameButton);
+                });
+
+                // Show the results container
+                lastButtonClickTime = currentTime;
+
+                resultsContainer.style.display = 'block';
+            } catch (error) {
+                console.error('Error fetching names:', error);
+            } finally {
+                generateButton.textContent = 'Generate';
+
+
+            }
+        });
+
+        async function generateNames(gender, theme) {
+            const apiUrl = `https://namegen.ayin.workers.dev/?gender=${gender}&theme=${theme}`;
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            return data || [];
+        }
+    </script>
+</body>
+
+</html>
